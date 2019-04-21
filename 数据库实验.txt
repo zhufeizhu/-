@@ -63,11 +63,7 @@ WHERE GRADE BETWEEN 80 AND 89;WHFWHWTSH
 4)查询执导过动作片或惊悚片的导演的姓名，要求where子句中只能有一个条件表达式；
 SELECT DNAME
 FROM FILM 
-WHERE FILM.FTYPE = '惊悚'
-UNION
-SELECT DNAME
-FROM FILM
-WHERE FILM.FTYPE = '动作';
+WHERE FILM.FTYPE IN('惊悚','动作');
 
 5)查询所有“巴霍巴利王”系列的电影的编号、电影名称、上映电影院名称及其上映年月； 
 SELECT FILM.FID,FNAME,TNAME,YEAR,MONTH
