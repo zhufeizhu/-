@@ -179,3 +179,13 @@ SELECT FID
 FROM SHOW_T
 GROUP BY FID
 HAVING COUNT(*) > 3);
+
+18)通过系统帮助文档学习系统关于时间、日期、字符串类型的函数，为电影表增加首映时间属性，然后查询将在下个月首映的电影信息。（选做）
+select *
+from FILM
+where (EXTRACT(YEAR FROM CURDATE()) = EXTRACT(YEAR from FTIME) and EXTRACT(MONTH FROM CURDATE()) - EXTRACT(MONTH from FTIME)= -1)
+or (EXTRACT(YEAR from FTIME) - EXTRACT(YEAR FROM CURDATE()) = 1 and EXTRACT(MONTH FROM CURDATE()) = 12 and EXTRACT(MONTH from FTIME) = 1) ;
+
+19)查询所有电影院信息，要求若影院所在行政区为洪山区，则在该列中显示“附近”，否则显示“遥远”。（选做）
+select *,if(THEATER.TAREA='洪山区','附近','遥远') as dis
+from THEATER;
