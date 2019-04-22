@@ -65,7 +65,7 @@ HAVING COUNT(DISTINCT ACTID)>0);
 3)查询所有用户评分低于80分或者高于89分的电影编号、电影名称、导演姓名及其用户评分，要求where子句中只能有一个条件表达式；
 SELECT FID,FNAME,DNAME,GRADE
 FROM FILM
-WHERE GRADE BETWEEN 80 AND 89;WHFWHWTSH
+WHERE GRADE BETWEEN 80 AND 89;
 
 4)查询执导过动作片或惊悚片的导演的姓名，要求where子句中只能有一个条件表达式；
 SELECT DNAME
