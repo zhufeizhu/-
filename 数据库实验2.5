@@ -7,10 +7,7 @@ Step3：更新C1=38
 Step1：求表中B项的和
 Step2：求表中B项的平均数
 
-situation1-T2为读未提交：
-这种隔离级下情况最多，因为T2可以随意读取到T1的未提交的数据，一共有10种情况，具体的结果不再计算。
-
-situation2-T2为读提交：
+situation1-T1为读提交：
 这种情况下T2只能读取到已经提交的数据，会有三种情况，具体如下：
   T2.Step1
   T2.Step2
@@ -33,9 +30,69 @@ situation2-T2为读提交：
   T2.Step2
   这种情况下SUM=150 AVG=37
  
-situation3-T2为可重复读
+situation2-T1为可重复读
 这种隔离级是在T2的基础上限制了每次读到的数据都是相同的（但是包括insert的数据，由此产生了幻读），同样有3种情况，前两种情况与读提交的结果相同，对于
 第三种情况，限制了T2.Step2的读取的结果与T2.Step1的结果要相同，但是增加了一个C4，因此结果SUM=150 AVG=150/4
 
-situation4-T2为可串行化
+situation3-T1为读未提交：与situation1相同。
+
+situation4-T1为可串行化
 这种隔离级下T2只能读取T1执行前或执行后的数据，对应situation2的前两种情况，不会发生第三种情况
+
+1)编写一个依据演员编号计算在其指定年份参演的电影数量的存储函数，并利用其查询2017年至少参演过2部电影的演员信息。
+delimiter$$
+create function serch(p_actid int(11),p_year int(11))
+returns int
+begin
+	declare p_amount int;
+	WITH tb(id) as (select distinct fid 
+												from show_t 
+												where show_t.`YEAR` = p_year)
+	select count(tb.id) into p_amount
+	from ACTIN left join tb on ACTIN.FID = tb.id
+	where ACTIN.ACTID = p_actid;
+	return p_amount;
+end$$
+
+调用：
+select ACTOR.ANAME
+from ACTOR
+where serch(ACTOR.ACTID,2018) >= 2;
+
+2)建立每家影院的上映电影总数的统计表，并编写一个存储过程来更新该表。
+delimiter$$
+create procedure help2()
+begin
+	declare p_tid int(11);
+	DECLARE done INT DEFAULT true;
+	DECLARE cur CURSOR FOR SELECT SHOW_T.TID FROM SHOW_T;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = false;  
+	OPEN cur; 
+	FETCH cur INTO p_tid;  
+  WHILE(done) 
+  DO  
+		if((select count(*) from new_tb where new_tb.tid = p_tid) = 0) then 
+			insert into new_tb(tid,amount) values(p_tid,0);
+		else
+			update new_tb set amount = amount + 1 where new_tb.tid = p_tid ;
+		end if;
+    FETCH cur INTO p_tid;    
+   END WHILE;
+ CLOSE cur;
+end$$
+
+调用：
+call help2();	
+
+3)编写一个触发器，用于实现对电影表的完整性控制规则：当增加一部电影时，若导演的姓名为周星驰，则电影类型自动设置为“喜剧”。
+create TRIGGER mytrigger
+before insert on FILM
+for each row
+begin 
+	if(NEW.DNAME = "周星驰")
+		then set NEW.FTYPE = "喜剧";
+	end if;
+end
+
+插入数据：insert into FILM values(20197396, "新喜剧之王", "爱情", "周星驰", 93, "N", 73,"2018-8-20");
+
